@@ -1,0 +1,134 @@
+/**********************************************
+ * * Author: Amir Darehshoorzadeh, UOttawa
+ * * Date  July 2013
+ * *
+ * **********************************************/
+
+
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+#include "ORtb.h"
+
+
+
+//ORTable Class****************************************************************************
+
+/*ORTable::ORTable() {
+  // Let's start with a 100 element maxelts.
+  elts = 0;
+  maxelts = 5;
+  rtab = new or_ent[maxelts];
+}
+
+void ORTable::AddEntry(const or_ent &ent)
+{
+  or_ent *it;
+  int max;
+
+  if ((it = (or_ent*) bsearch(&ent, rtab, elts, sizeof(or_ent), 
+				 rtent_trich))) {
+    bcopy(&ent,it,sizeof(or_ent));
+    return;
+    }
+
+  if (elts == maxelts) {
+    or_ent *tmp = rtab;
+    maxelts *= 2;
+    rtab = new or_ent[maxelts];
+    bcopy(tmp, rtab, elts*sizeof(or_ent));
+    delete tmp;
+  }
+  
+  for (max=0; max<elts; max++) {
+	  if (ent.dst < rtab[max].dst) {
+		  break;
+	  }
+  }
+
+  int i = elts-1;
+  while (i >= max) 
+	  rtab[i+1] = rtab[i--];
+ 
+  bcopy(&ent, &rtab[max], sizeof(or_ent));
+  elts++;
+
+  return;
+}
+
+
+or_ent* ORTable::GetEntry(nsaddr_t dest) {
+  or_ent ent;
+  ent.dst = dest;
+  return (or_ent *) bsearch(&ent, rtab, elts, sizeof(or_ent), rtent_trich);
+}
+*/
+
+//GeneralTable*********************************************************
+
+/*void GeneralTable::checkTable(generalTable_ent* entries[1000]){
+ generalTable_ent *current,*tempCurrent;
+  int i=0;
+
+  current = head;
+  while (current != NULL){
+    if (current->timetoforward <= NOW) 
+      {
+	if (current->isDelivered == FALSE){
+	  if (i == 1000)
+	    {printf("entries are more than 1000\n"); exit(0);}
+	  entries[i++] = current;
+	  tempCurrent = current->next;
+	  // deleteNode(current); //Delete it because later when the current node sending it, it will be added to the IsSentTable
+	  current = tempCurrent;
+	}
+	else
+	  current = current->next;
+      }
+    else
+      current =  current->next;
+  }
+  entries[i] = NULL;
+}
+*/
+
+GeneralTable::GeneralTable() {
+  // Let's start with a 100 element maxelts.
+  size = 0;
+  head = NULL;
+  tail = NULL;
+}
+
+void GeneralTable::insert(u_int8_t seqNo, nsaddr_t src, nsaddr_t dst, Packet *pkt){
+  
+  generalTable_ent *newNode = new generalTable_ent; 
+  newNode->seqNo = seqNo;
+  newNode->src = src;
+  newNode->dst = dst;
+  newNode->pkt = pkt;
+  
+  if (size == 0) {
+    head = newNode;
+    tail = newNode;
+  }
+  else {
+    tail->next = newNode;
+    tail = newNode;
+  }
+  size++;
+}
+
+bool GeneralTable::isInGeneralTable(nsaddr_t src){
+  
+  generalTable_ent* current;
+  
+  current = head;
+  while (current != NULL) {
+    if (current->src == src)	return TRUE;
+    current = current->next;
+  }
+  return FALSE;
+}
+
+
